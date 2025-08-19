@@ -7,10 +7,12 @@ To implement a real-time object detection system using a pre-trained YOLO model,
 ---
 ### **Observations**
 
-![A screenshot of the project's user interface](images/screenshot1.png)
-![A screenshot of the project's user interface](images/screenshot2.png)
-![A screenshot of the project's user interface](images/screenshot3.png)
-![A screenshot of the project's user interface](images/screenshot4.png)
+![A screenshot of the project's user interface](images/Screenshot1.png)
+![A screenshot of the project's user interface](images/Screenshot2.png)
+![A screenshot of the project's user interface](images/Screenshot3.png)
+![A screenshot of the project's user interface](images/Screenshot4.png)
+![A screenshot of the project's user interface](images/Screenshot5.png)
+![A screenshot of the project's user interface](images/Screenshot6.png)
 ---
 ### **1. System Setup and Environment**
 
