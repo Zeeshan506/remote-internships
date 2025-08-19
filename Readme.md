@@ -5,7 +5,15 @@
 To implement a real-time object detection system using a pre-trained YOLO model, process live video from a webcam, and display bounding boxes with class labels for detected objects.
 
 ---
+### **Observations**
 
+![A screenshot of the project's user interface](images/Screenshot1.png)
+![A screenshot of the project's user interface](images/Screenshot2.png)
+![A screenshot of the project's user interface](images/Screenshot3.png)
+![A screenshot of the project's user interface](images/Screenshot4.png)
+![A screenshot of the project's user interface](images/Screenshot5.png)
+![A screenshot of the project's user interface](images/Screenshot6.png)
+---
 ### **1. System Setup and Environment**
 
 The system was developed on a **Dell Latitude E5400 laptop** running a CPU with no dedicated GPU. This hardware limitation was a primary consideration during implementation.
