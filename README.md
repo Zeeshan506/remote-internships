@@ -10,8 +10,12 @@ A collection of internship tasks and projects organized for clean navigation.
 
 ## DevelopersHub
 
-- [Task 1: Iris dataset visualization](./developerhub-task-1-dataset-visualization/README.md)
-- [Task 2: Predictive model training (stock prices)](./developerhub-task-2-pridictive-model-training/README.md)
+- **Task 1**
+  - [M1: Iris dataset visualization](./developerhub-task-1-dataset-visualization/README.md)
+  - [M2: News classifier](./developerhub-task-1-m2-news-classifier/README.md)
+- **Task 2**
+  - [M1: Predictive model training (stock prices)](./developerhub-task-2-pridictive-model-training/README.md)
+  - [M2: End-to-End ML Pipeline](./developerhub-task-2-m2-End-to-End-ML-Pipieline/README.md)
 - [Task 3: Heart disease prediction](./developerhub-task-3-heart-disease-pridiction/README.md)
 - [Task 4: General health query chatbot](./developerhub-task-4-general-health-query-chatbot/README.md)
 
