@@ -22,8 +22,13 @@ A collection of internship tasks and projects organized for clean navigation.
 ## ArchTechnologies
 
 - [ArchTechnology internship projects](./ArchTechnology-Internship-Projects/README.md)
+- [ArchTechnologies Task 3](./ArchTechnology-Internship-Task-3/Readme.md) 
 
 ## Importing projects (subtrees)
+
+This File is intended to take given repo remotes (ssh) and merge their working tree, so that the repos are cleanly organized and stored with the git working tree preserved in orginal state. 
+
+This Script Can be reused, just replace the URLs for the remotes you want to add. 
 
 Projects in this repository are intended to be imported using `git subtree add` without squashing so each project preserves its original commit history.
 
