@@ -4,17 +4,14 @@ set -euo pipefail
 # Import configured repositories as git subtrees while preserving full history.
 # Usage:
 #   ./import-subtrees.sh [--dry-run] [--yes]
-#
-# Notes:
-# - Uses SSH GitHub URLs.
-# - Automatically detects the default branch: HEAD, then main, then master, then first available branch.
-# - Destination path will be: ./OWNER/REPO_NAME
-#   Example: ./Zeeshan506/developerhub-task-1-m2-news-classifier
 
-DEST_ROOT="."
+# Keep this empty for paths like: Zeeshan506/repo-name
+# Do NOT use "." or "./" here, because git subtree can fail with:
+#   error: invalid path './owner/repo/.gitignore'
+DEST_ROOT=""
 KEEP_REMOTES=0
 
-REPOS=(
+REPO_URLS=(
   "git@github.com:Zeeshan506/developerhub-task-1-m2-news-classifier.git"
   "git@github.com:Zeeshan506/developerhub-task-3-m2-Auto-Tagging-Support-Tickets-Using-LLM.git"
   "git@github.com:Zeeshan506/developerhub-task-2-m2-End-to-End-ML-Pipieline.git"
@@ -113,7 +110,6 @@ ensure_remote_name() {
     candidate="${preferred}-${i}"
     i=$((i + 1))
   done
-
   echo "$candidate"
 }
 
@@ -150,29 +146,38 @@ detect_default_branch() {
     return 0
   fi
 
-  echo
-  echo "Could not detect branch for: $url" >&2
-  echo "Run this command manually to see the GitHub/SSH error:" >&2
-  echo "  git ls-remote --symref $url HEAD" >&2
-  echo >&2
   die "Unable to detect default branch for $url"
 }
 
-parse_owner_repo_from_ssh_url() {
+parse_owner_repo() {
   local url="$1"
+  local path
 
-  # Expected format:
-  # git@github.com:OWNER/REPO.git
+  case "$url" in
+  git@github.com:*.git)
+    path="${url#git@github.com:}"
+    path="${path%.git}"
+    ;;
+  https://github.com/*.git)
+    path="${url#https://github.com/}"
+    path="${path%.git}"
+    ;;
+  *)
+    die "Unsupported GitHub URL format: $url"
+    ;;
+  esac
 
-  local path_part
-  path_part="${url#git@github.com:}"
-  path_part="${path_part%.git}"
+  echo "$path"
+}
 
-  if [ "$path_part" = "$url" ] || [[ "$path_part" != */* ]]; then
-    die "Invalid GitHub SSH URL: $url"
+make_prefix() {
+  local owner_repo="$1"
+
+  if [ -n "$DEST_ROOT" ]; then
+    echo "${DEST_ROOT%/}/$owner_repo"
+  else
+    echo "$owner_repo"
   fi
-
-  echo "$path_part"
 }
 
 confirm_plan() {
@@ -180,13 +185,12 @@ confirm_plan() {
     return 0
   fi
 
-  echo "This will import ${#REPOS[@]} repositories as git subtrees with full history:"
-  for url in "${REPOS[@]}"; do
+  echo "This will import ${#REPO_URLS[@]} repositories as git subtrees with full history:"
+  for url in "${REPO_URLS[@]}"; do
     local owner_repo
-    owner_repo="$(parse_owner_repo_from_ssh_url "$url")"
-    echo "  - ${url} -> ${DEST_ROOT%/}/${owner_repo}"
+    owner_repo="$(parse_owner_repo "$url")"
+    echo "  - $url -> $(make_prefix "$owner_repo")"
   done
-
   echo
   read -r -p "Continue? [y/N] " reply
   case "$reply" in
@@ -200,12 +204,12 @@ main() {
   ensure_repo_state
   confirm_plan
 
-  for url in "${REPOS[@]}"; do
+  for url in "${REPO_URLS[@]}"; do
     local owner_repo
-    owner_repo="$(parse_owner_repo_from_ssh_url "$url")"
+    owner_repo="$(parse_owner_repo "$url")"
 
     local prefix
-    prefix="${DEST_ROOT%/}/${owner_repo}"
+    prefix="$(make_prefix "$owner_repo")"
 
     if [ -e "$prefix" ]; then
       die "Destination already exists: $prefix"
@@ -220,7 +224,7 @@ main() {
     local remote_name
     remote_name="$(ensure_remote_name "$remote_base" "$url")"
 
-    echo "Importing ${owner_repo} (branch: ${branch}) -> ${prefix}"
+    echo "Importing $owner_repo (branch: $branch) -> $prefix"
 
     if ! remote_exists "$remote_name"; then
       run_cmd git remote add "$remote_name" "$url"
