@@ -21,10 +21,10 @@ ASSUME_YES=0
 
 for arg in "$@"; do
   case "$arg" in
-    --dry-run) DRY_RUN=1 ;;
-    --yes) ASSUME_YES=1 ;;
-    -h|--help)
-      cat <<'USAGE'
+  --dry-run) DRY_RUN=1 ;;
+  --yes) ASSUME_YES=1 ;;
+  -h | --help)
+    cat <<'USAGE'
 Import configured repositories as git subtrees while preserving full history.
 
 Options:
@@ -32,12 +32,12 @@ Options:
   --yes       Skip confirmation prompt
   -h, --help  Show this help
 USAGE
-      exit 0
-      ;;
-    *)
-      echo "Unknown option: $arg" >&2
-      exit 1
-      ;;
+    exit 0
+    ;;
+  *)
+    echo "Unknown option: $arg" >&2
+    exit 1
+    ;;
   esac
 done
 
@@ -150,14 +150,14 @@ confirm_plan() {
 
   echo "This will import ${#REPOS[@]} repositories as git subtrees with full history:"
   for spec in "${REPOS[@]}"; do
-    IFS='|' read -r owner repo_name <<< "$spec"
+    IFS='|' read -r owner repo_name <<<"$spec"
     echo "  - ${owner}/${repo_name} -> ${DEST_ROOT%/}/${owner}/${repo_name}"
   done
   echo
   read -r -p "Continue? [y/N] " reply
   case "$reply" in
-    y|Y|yes|YES) ;;
-    *) die "Aborted" ;;
+  y | Y | yes | YES) ;;
+  *) die "Aborted" ;;
   esac
 }
 
@@ -167,11 +167,12 @@ main() {
   confirm_plan
 
   for spec in "${REPOS[@]}"; do
-    IFS='|' read -r owner repo_name <<< "$spec"
+    IFS='|' read -r owner repo_name <<<"$spec"
     [ -n "$owner" ] || die "Invalid repo spec (owner missing): $spec"
     [ -n "$repo_name" ] || die "Invalid repo spec (repo missing): $spec"
 
-    local url="https://github.com/${owner}/${repo_name}.git"
+    # Updated line below to leverage your system's SSH configuration
+    local url="git@github.com:${owner}/${repo_name}.git"
     local prefix="${DEST_ROOT%/}/${owner}/${repo_name}"
 
     if [ -e "$prefix" ]; then
