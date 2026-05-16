@@ -12,14 +12,7 @@ DEST_ROOT=""
 KEEP_REMOTES=0
 
 REPO_URLS=(
-  "git@github.com:Zeeshan506/developerhub-task-1-m2-news-classifier.git"
-  "git@github.com:Zeeshan506/developerhub-task-3-m2-Auto-Tagging-Support-Tickets-Using-LLM.git"
-  "git@github.com:Zeeshan506/developerhub-task-2-m2-End-to-End-ML-Pipieline.git"
-  "git@github.com:Zeeshan506/developerhub-task-4-general-health-query-chatbot.git"
-  "git@github.com:Zeeshan506/developerhub-task-1-dataset-visualization.git"
-  "git@github.com:Zeeshan506/developerhub-task-2-pridictive-model-training.git"
-  "git@github.com:Zeeshan506/developerhub-task-3-heart-disease-pridiction.git"
-  "git@github.com:Zeeshan506/ArchTechnology-Internship-Projects.git"
+  "git@github.com:Zeeshan506/ArchTechnology-Internship-Task-3.git"
 )
 
 DRY_RUN=0
