@@ -4,16 +4,25 @@ set -euo pipefail
 # Import configured repositories as git subtrees while preserving full history.
 # Usage:
 #   ./import-subtrees.sh [--dry-run] [--yes]
+#
+# Notes:
+# - Uses SSH GitHub URLs.
+# - Automatically detects the default branch: HEAD, then main, then master, then first available branch.
+# - Destination path will be: ./OWNER/REPO_NAME
+#   Example: ./Zeeshan506/developerhub-task-1-m2-news-classifier
 
 DEST_ROOT="."
 KEEP_REMOTES=0
 
 REPOS=(
-  "DevelopersHub|developerhub-task-1-dataset-visualization"
-  "DevelopersHub|developerhub-task-2-pridictive-model-training"
-  "DevelopersHub|developerhub-task-3-heart-disease-pridiction"
-  "DevelopersHub|developerhub-task-4-general-health-query-chatbot"
-  "ArchTechnologies|ArchTechnology-Internship-Projects"
+  "git@github.com:Zeeshan506/developerhub-task-1-m2-news-classifier.git"
+  "git@github.com:Zeeshan506/developerhub-task-3-m2-Auto-Tagging-Support-Tickets-Using-LLM.git"
+  "git@github.com:Zeeshan506/developerhub-task-2-m2-End-to-End-ML-Pipieline.git"
+  "git@github.com:Zeeshan506/developerhub-task-4-general-health-query-chatbot.git"
+  "git@github.com:Zeeshan506/developerhub-task-1-dataset-visualization.git"
+  "git@github.com:Zeeshan506/developerhub-task-2-pridictive-model-training.git"
+  "git@github.com:Zeeshan506/developerhub-task-3-heart-disease-pridiction.git"
+  "git@github.com:Zeeshan506/ArchTechnology-Internship-Projects.git"
 )
 
 DRY_RUN=0
@@ -104,6 +113,7 @@ ensure_remote_name() {
     candidate="${preferred}-${i}"
     i=$((i + 1))
   done
+
   echo "$candidate"
 }
 
@@ -140,7 +150,29 @@ detect_default_branch() {
     return 0
   fi
 
+  echo
+  echo "Could not detect branch for: $url" >&2
+  echo "Run this command manually to see the GitHub/SSH error:" >&2
+  echo "  git ls-remote --symref $url HEAD" >&2
+  echo >&2
   die "Unable to detect default branch for $url"
+}
+
+parse_owner_repo_from_ssh_url() {
+  local url="$1"
+
+  # Expected format:
+  # git@github.com:OWNER/REPO.git
+
+  local path_part
+  path_part="${url#git@github.com:}"
+  path_part="${path_part%.git}"
+
+  if [ "$path_part" = "$url" ] || [[ "$path_part" != */* ]]; then
+    die "Invalid GitHub SSH URL: $url"
+  fi
+
+  echo "$path_part"
 }
 
 confirm_plan() {
@@ -149,10 +181,12 @@ confirm_plan() {
   fi
 
   echo "This will import ${#REPOS[@]} repositories as git subtrees with full history:"
-  for spec in "${REPOS[@]}"; do
-    IFS='|' read -r owner repo_name <<<"$spec"
-    echo "  - ${owner}/${repo_name} -> ${DEST_ROOT%/}/${owner}/${repo_name}"
+  for url in "${REPOS[@]}"; do
+    local owner_repo
+    owner_repo="$(parse_owner_repo_from_ssh_url "$url")"
+    echo "  - ${url} -> ${DEST_ROOT%/}/${owner_repo}"
   done
+
   echo
   read -r -p "Continue? [y/N] " reply
   case "$reply" in
@@ -166,14 +200,12 @@ main() {
   ensure_repo_state
   confirm_plan
 
-  for spec in "${REPOS[@]}"; do
-    IFS='|' read -r owner repo_name <<<"$spec"
-    [ -n "$owner" ] || die "Invalid repo spec (owner missing): $spec"
-    [ -n "$repo_name" ] || die "Invalid repo spec (repo missing): $spec"
+  for url in "${REPOS[@]}"; do
+    local owner_repo
+    owner_repo="$(parse_owner_repo_from_ssh_url "$url")"
 
-    # Updated line below to leverage your system's SSH configuration
-    local url="git@github.com:${owner}/${repo_name}.git"
-    local prefix="${DEST_ROOT%/}/${owner}/${repo_name}"
+    local prefix
+    prefix="${DEST_ROOT%/}/${owner_repo}"
 
     if [ -e "$prefix" ]; then
       die "Destination already exists: $prefix"
@@ -183,12 +215,12 @@ main() {
     branch="$(detect_default_branch "$url")"
 
     local remote_base
-    remote_base="subtree-$(sanitize_remote_name "${owner}-${repo_name}")"
+    remote_base="subtree-$(sanitize_remote_name "$owner_repo")"
 
     local remote_name
     remote_name="$(ensure_remote_name "$remote_base" "$url")"
 
-    echo "Importing ${owner}/${repo_name} (branch: ${branch}) -> ${prefix}"
+    echo "Importing ${owner_repo} (branch: ${branch}) -> ${prefix}"
 
     if ! remote_exists "$remote_name"; then
       run_cmd git remote add "$remote_name" "$url"
